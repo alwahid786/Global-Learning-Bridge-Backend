@@ -11,118 +11,37 @@ import {
   mailTemplateForNewUserCredentials,
 } from "../utils/htmlPages.js";
 import { getEnv } from "../configs/config.js";
+import { sendToken } from "../utils/sendToken.js";
 
-// Create client + send email notification
-//-----------
-const createClient = asyncHandler(async (req, res, next) => {
-  const ownerId = req?.user?._id;
-  if (!isValidObjectId(ownerId)) {
-    return next(new CustomError(400, "Invalid User Id"));
-  }
+// Create Member
+//-------------
+const createMember = asyncHandler(async (req, res, next) => {
+  const { name, email, phone, password, gender } = req.body;
 
-  const user = await Auth.findById(ownerId);
-  if (!user) {
-    return next(new CustomError(400, "User Not Found"));
-  }
-
-  if (!req?.body) {
+  if (!name || !email || !phone || !password || !gender) {
     return next(new CustomError(400, "Please provide all required fields"));
   }
 
-  const {
-    clientName,
-    clientEmail,
-    clientPhone,
-    clientPassword,
-    storeName,
-    dealerId,
-    address,
-    storePhone,
-    emails,
-    accountOwner,
-    businessOwner,
-    businessOwnerView,
-    percentage,
-  } = req.body;
-
-  // Validate required client credentials
-  if (!clientName || !clientEmail || !clientPassword) {
-    return next(
-      new CustomError(400, "Client Name, Email and Password are required")
-    );
-  }
-
-  // Check if client already exists
-  const existingClient = await Auth.findOne({ email: clientEmail });
-  if (existingClient?._id) {
+  const existingUser = await Auth.findOne({ email });
+  if (existingUser?._id)
     return next(new CustomError(403, "Email already exists"));
-  }
 
-  // Create new client
-  const newClient = await Auth.create({
-    owner: ownerId,
-    name: clientName,
-    email: clientEmail,
-    password: clientPassword,
-    phone: clientPhone,
-    role: "client",
+  const newMember = await Auth.create({
+    name,
+    email,
+    phone,
+    password,
+    gender,
+    role: "member",
     lastLogin: new Date(),
-
-    // Extended fields
-    storeName,
-    dealerId,
-    address,
-    storePhone: storePhone,
-    emails,
-    accountOwner,
-    businessOwner,
-    businessOwnerView,
-    percentage,
+    isDonor: false,
   });
+  if (!newMember)
+    return next(new CustomError(400, "Error while creating user"));
 
-  if (!newClient) {
-    return next(new CustomError(400, "Error while creating client"));
-  }
+  // email notification pending for now
 
-  // Send Email Notification
-
-  const subject = "New Client Created";
-  const message = `A new client, ${clientName} of Company ${storeName} has been created.`;
-
-  const templateData = {
-    clientName: clientName,
-    message: message,
-    clientCompany: storeName,
-    senderCompany: user?.companyName || user?.storeName,
-  };
-
-  const templatePage = mailTemplateForNotifications(templateData);
-
-  if (Array.isArray(emails) && emails.length > 0) {
-    emails.forEach((email) => {
-      sendMail(email, subject, `${templatePage}`, true).catch((err) =>
-        console.error("Email sending failed:", err.message)
-      );
-    });
-  }
-
-  const htmlTemplate = mailTemplateForNewUserCredentials({
-    message:
-      "Hi there, your client account has been created automatically by Company's manager using your email",
-    receiverEmail: clientEmail,
-    autoPassword: clientPassword,
-    senderCompany: "National Warranty System",
-    loginUrl: getEnv("LOGIN_URL"),
-    logoUrl: getEnv("LOGO_URL_WITH_BACKGROUND"),
-  });
-
-  await sendMail(clientEmail, "Your Account Credentials", htmlTemplate, true);
-
-  return res.status(200).json({
-    success: true,
-    message: "Client Created Successfully",
-    client: newClient,
-  });
+  await sendToken(res, next, newMember, 201, "Member created successfully");
 });
 
 // Get clients
@@ -596,7 +515,7 @@ const getClientsActivityStats = asyncHandler(async (req, res, next) => {
 });
 
 export {
-  createClient,
+  createMember,
   getClients,
   deleteClient,
   updateClient,

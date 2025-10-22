@@ -1,19 +1,19 @@
 import express from "express";
 import {
-  createClient,
+  createMember,
   getClients,
   deleteClient,
   updateClient,
   getClientStats,
   getClientsActivityStats,
   getClientsStatsByFilters,
-} from "../controllers/clients.controller.js";
+} from "../controllers/members.controller.js";
 import { isAuthenticated } from "../middlewares/authMiddleware.js";
 import { singleUpload } from "../middlewares/multer.js";
 
 const app = express.Router();
 
-app.post("/createClient", isAuthenticated, singleUpload, createClient);
+app.post("/createMember", singleUpload, createMember);
 app.get("/getClients", isAuthenticated, getClients);
 app.delete("/deleteClient/:id", isAuthenticated, deleteClient);
 app.put("/updateClient/:id", isAuthenticated, singleUpload, updateClient);

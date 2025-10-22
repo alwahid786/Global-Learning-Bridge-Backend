@@ -3,7 +3,7 @@ import express from "express";
 import { errorHandler } from "./middlewares/errorHandler.js";
 import AuthRoutes from "./routes/auth.routes.js";
 import UserRoutes from "./routes/user.routes.js";
-import ClientRoutes from "./routes/client.routes.js";
+import MemberRoutes from "./routes/member.routes.js";
 import ClaimsRoutes from "./routes/claims.routes.js";
 import ChatRoutes from "./routes/chat.routes.js";
 import NotificationRoutes from "./routes/notifications.routes.js";
@@ -72,7 +72,7 @@ app.use("/api/users", UserRoutes);
 app.use("/api/claims", ClaimsRoutes);
 app.use("/api/chats", ChatRoutes);
 app.use("/api/notifications", NotificationRoutes);
-app.use("/api/clients", ClientRoutes);
+app.use("/api/members", MemberRoutes);
 app.use("/api/invoices", InvoicesRoutes);
 app.use("/api/payments", PaymentRoutes);
 

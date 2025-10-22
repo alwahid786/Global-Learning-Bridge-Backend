@@ -1,0 +1,38 @@
+import nodemailer from "nodemailer";
+import { getEnv } from "../configs/config.js";
+
+const transporter = nodemailer.createTransport({
+  host: getEnv("NODEMAILER_HOST"),
+  port: parseInt(getEnv("NODEMAILER_PORT")),
+  auth: {
+    user: getEnv("NODEMAILER_USER"),
+    pass: getEnv("NODEMAILER_PASSWORD"),
+  },
+  secure: false,
+  logger: true,
+  debug: true,
+  requireTLS: true,
+});
+
+const sendMail = async (to, subject, text, html = false, attachments) => {
+  try {
+    if (!to || !subject || !text)
+      throw new Error("Please Provide To, Subject and Text");
+
+    await transporter.sendMail({
+      from: getEnv("NODEMAILER_FROM"),
+      to,
+      subject,
+      text: html ? undefined : text,
+      html: html ? text : undefined,
+      attachments: attachments || undefined,
+    });
+
+    return true;
+  } catch (error) {
+    console.log("error while sending mail", error);
+    return false;
+  }
+};
+
+export { sendMail };

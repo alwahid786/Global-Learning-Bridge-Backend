@@ -7,7 +7,7 @@ export const initSocket = (server) => {
   io = new Server(server, {
     cors: {
       origin: [
-        "https://warranty-system-frontend.vercel.app",
+        "https://global-learning-bridge-charity-proj.vercel.app",
         "http://localhost:5173",
         "http://5.223.51.13",
       ],

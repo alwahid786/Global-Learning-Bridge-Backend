@@ -87,26 +87,6 @@ const login = asyncHandler(async (req, res, next) => {
     return next(new CustomError(400, "Wrong email or password"));
   }
 
-  const now = new Date();
-  const thirtyDaysAgo = new Date(now - 30 * 24 * 60 * 60 * 1000);
-
-  user.activeStatus = !user.lastLogin || user.lastLogin >= thirtyDaysAgo;
-  user.lastLogin = now;
-
-  if (
-    user.role === "admin" &&
-    user.subscriptionEnd &&
-    user.subscriptionEnd <= now
-  ) {
-    user.isMember = false;
-    await user.save();
-    return res.status(403).json({
-      success: false,
-      message: "Your subscription has expired. Please renew to continue.",
-    });
-  }
-
-  await user.save();
   await sendToken(res, next, user, 200, "Logged in successfully");
 });
 
@@ -192,23 +172,6 @@ const getMyProfile = asyncHandler(async (req, res, next) => {
   const user = await Auth.findById(userId).select("-password -__v");
   if (!user) {
     return next(new CustomError(404, "User not found"));
-  }
-
-  if (!user.activeStatus) {
-    return next(new CustomError(403, "Account inactive. Please log in again."));
-  }
-
-  if (user.role === "admin") {
-    const now = new Date();
-
-    if (user.subscriptionEnd && user.subscriptionEnd < now && user.isMember) {
-      user.isMember = false;
-      await user.save();
-    }
-
-    if (!user.isMember) {
-      return next(new CustomError(403, "Your subscription has expired."));
-    }
   }
 
   return res.status(200).json({

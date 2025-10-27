@@ -10,6 +10,8 @@ import { createNotification } from "../utils/createNotification.js";
 import { Parser } from "json2csv";
 import { sendMail } from "../utils/resendMail.js";
 import { mailTemplateForNotifications } from "../utils/htmlPages.js";
+import Payment from "../models/payment.model.js";
+import { generateReceiptPDF } from "../utils/pdfGenerator.js";
 
 // Create Claims + Create Notification + send email notification
 //--------------
@@ -748,6 +750,54 @@ const getInvoicesStats = asyncHandler(async (req, res, next) => {
   });
 });
 
+// Get All Donations
+//------------------
+const getAllDonations = asyncHandler(async (req, res, next) => {
+  const ownerId = req?.user?._id;
+  if (!isValidObjectId(ownerId))
+    return next(new CustomError(400, "Invalid User Id"));
+
+  const user = await Auth.findById(ownerId);
+  if (!user) return next(new CustomError(400, "User Not Found"));
+
+  const donations = await Payment.find().lean();
+
+  res.status(200).json({
+    success: true,
+    message: "Donations Fetched Successfully",
+    data: donations,
+  });
+});
+
+// Download Receipt
+// ----------------
+const downloadReceipt = asyncHandler(async (req, res, next) => {
+  const receiptId = req?.params?.receiptId;
+  if (!isValidObjectId(receiptId))
+    return next(new CustomError(400, "Invalid Receipt Id"));
+
+  const receipt = await Payment.findById(receiptId);
+  if (!receipt) return next(new CustomError(400, "Receipt Not Found"));
+
+  const receiptData = {
+    donorName: receipt?.name,
+    email: receipt?.email,
+    amount: receipt?.amount,
+    currency: receipt?.currency,
+    status: receipt?.status,
+    transactionId: receipt?.transactionId,
+    date: receipt?.createdAt,
+  };
+
+  const pdfBuffer = await generateReceiptPDF(receiptData);
+
+  res.set({
+    "Content-Type": "application/pdf",
+    "Content-Disposition": `attachment; filename=Receipt-${receipt?.transactionId}.pdf`,
+  });
+  return res.send(pdfBuffer);
+});
+
 export {
   createClaims,
   exportClaims,
@@ -760,4 +810,6 @@ export {
   getInvoicesStats,
   updateClaimAdditionalData,
   deleteClaim,
+  getAllDonations,
+  downloadReceipt,
 };

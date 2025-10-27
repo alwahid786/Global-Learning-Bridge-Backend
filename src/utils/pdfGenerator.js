@@ -459,3 +459,263 @@ export const generateInvoicePDF = (invoiceData) => {
     }
   });
 };
+
+export const generateReceiptPDF = (receiptData) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const {
+        donorName,
+        email,
+        amount,
+        currency,
+        status,
+        transactionId,
+        date,
+      } = receiptData;
+
+      const brandColor = "rgba(6, 26, 37, 1)";
+      const highlightBoxColor = "#d9edf7";
+      const headerFillColor = "#08506E";
+
+      let companyLogoBase64 = null;
+      let companyLogo = getEnv("LOGO_URL_WITH_BACKGROUND");
+      if (companyLogo) {
+        const response = await axios.get(companyLogo, {
+          responseType: "arraybuffer",
+        });
+        const base64 = Buffer.from(response.data, "binary").toString("base64");
+        const mimeType = companyLogo.endsWith(".png")
+          ? "image/png"
+          : "image/jpeg";
+        companyLogoBase64 = `data:${mimeType};base64,${base64}`;
+      }
+
+      const formattedDate = new Date(date).toLocaleString("en-GB", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+
+      // --- PDF Definition ---
+      const docDefinition = {
+        pageSize: "A5",
+        pageMargins: [40, 40, 40, 40],
+        content: [
+          // HEADER
+          {
+            stack: [
+              companyLogoBase64
+                ? {
+                    image: companyLogoBase64,
+                    width: 80,
+                    height: 80,
+                    alignment: "center",
+                    margin: [0, 0, 0, 8],
+                  }
+                : {
+                    text: "GLOBAL LEARNING BRIDGE",
+                    alignment: "center",
+                    color: brandColor,
+                    bold: true,
+                    fontSize: 18,
+                    margin: [0, 0, 0, 8],
+                  },
+              {
+                text: "Donation Receipt",
+                alignment: "center",
+                color: "#000000",
+                bold: true,
+                fontSize: 16,
+                margin: [0, 0, 0, 5],
+              },
+              {
+                text: "Thank you for your generous contribution!",
+                alignment: "center",
+                italics: true,
+                color: "#555",
+                fontSize: 10,
+                margin: [0, 0, 0, 10],
+              },
+              {
+                canvas: [
+                  { type: "line", x1: 0, y1: 0, x2: 350, y2: 0, lineWidth: 1 },
+                ],
+                margin: [0, 5, 0, 10],
+              },
+            ],
+          },
+
+          // RECEIPT DETAILS TABLE
+          {
+            table: {
+              widths: ["35%", "65%"],
+              body: [
+                [
+                  {
+                    text: "Donor Name",
+                    bold: true,
+                    color: brandColor,
+                    border: [false, false, false, false],
+                  },
+                  {
+                    text: donorName || "-",
+                    border: [false, false, false, false],
+                  },
+                ],
+                [
+                  {
+                    text: "Email",
+                    bold: true,
+                    color: brandColor,
+                    border: [false, false, false, false],
+                  },
+                  {
+                    text: email || "-",
+                    border: [false, false, false, false],
+                  },
+                ],
+                [
+                  {
+                    text: "Amount",
+                    bold: true,
+                    color: brandColor,
+                    border: [false, false, false, false],
+                  },
+                  {
+                    text: `${amount || 0} ${currency || ""}`,
+                    border: [false, false, false, false],
+                  },
+                ],
+                [
+                  {
+                    text: "Transaction ID",
+                    bold: true,
+                    color: brandColor,
+                    border: [false, false, false, false],
+                  },
+                  {
+                    text: transactionId || "-",
+                    border: [false, false, false, false],
+                  },
+                ],
+                [
+                  {
+                    text: "Status",
+                    bold: true,
+                    color: brandColor,
+                    border: [false, false, false, false],
+                  },
+                  {
+                    text: status || "-",
+                    color:
+                      status?.toLowerCase() === "succeeded"
+                        ? "green"
+                        : status?.toLowerCase() === "pending"
+                        ? "orange"
+                        : "red",
+                    bold: true,
+                    border: [false, false, false, false],
+                  },
+                ],
+                [
+                  {
+                    text: "Date",
+                    bold: true,
+                    color: brandColor,
+                    border: [false, false, false, false],
+                  },
+                  {
+                    text: formattedDate,
+                    border: [false, false, false, false],
+                  },
+                ],
+              ],
+            },
+            layout: {
+              fillColor: (rowIndex) => (rowIndex % 2 === 0 ? "#f9f9f9" : null),
+              paddingLeft: () => 6,
+              paddingRight: () => 6,
+              paddingTop: () => 4,
+              paddingBottom: () => 4,
+            },
+          },
+
+          { text: "\n" },
+
+          // FOOTER / THANK YOU
+          {
+            stack: [
+              {
+                text: "We appreciate your continued support.",
+                alignment: "center",
+                italics: true,
+                fontSize: 10,
+                color: "#666",
+              },
+              {
+                text: "This receipt serves as confirmation of your donation.",
+                alignment: "center",
+                italics: true,
+                fontSize: 9,
+                color: "#999",
+                margin: [0, 2, 0, 10],
+              },
+              {
+                text: "Global Learning Bridge",
+                alignment: "center",
+                bold: true,
+                color: brandColor,
+              },
+              {
+                text: "support@globallearningbridge.com",
+                alignment: "center",
+                fontSize: 9,
+                color: "#555",
+              },
+            ],
+          },
+        ],
+
+        styles: {
+          title: {
+            fontSize: 16,
+            bold: true,
+            alignment: "center",
+            color: brandColor,
+          },
+          label: {
+            fontSize: 10,
+            bold: true,
+            color: brandColor,
+          },
+          value: {
+            fontSize: 10,
+            color: "#333",
+          },
+          footer: {
+            fontSize: 8,
+            italics: true,
+            alignment: "center",
+            color: "#777",
+          },
+        },
+
+        defaultStyle: {
+          font: "Roboto",
+        },
+      };
+
+      // --- Generate PDF ---
+      const pdfDoc = printer.createPdfKitDocument(docDefinition);
+      let chunks = [];
+      pdfDoc.on("data", (chunk) => chunks.push(chunk));
+      pdfDoc.on("end", () => resolve(Buffer.concat(chunks)));
+      pdfDoc.on("error", (err) => reject(err));
+      pdfDoc.end();
+    } catch (error) {
+      reject(error);
+    }
+  });
+};

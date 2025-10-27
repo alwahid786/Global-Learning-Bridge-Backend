@@ -33,13 +33,10 @@ const authSchema = new mongoose.Schema(
     resetPasswordToken: String,
     resetPasswordExpire: Date,
 
-    lastLogin: { type: Date },
-
-    activeStatus: { type: Boolean, default: true },
-
     // Membership Fields
     //------------------
     isDonor: { type: Boolean, default: false },
+    status: { type: String, enum: ["enabled", "disabled"], default: "enabled" },
   },
   { timestamps: true }
 );

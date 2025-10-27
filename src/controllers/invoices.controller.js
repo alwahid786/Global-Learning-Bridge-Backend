@@ -668,6 +668,59 @@ const removeArchiveInvoices = asyncHandler(async (req, res, next) => {
   });
 });
 
+// Get All Members
+//----------------
+const getAllMembers = asyncHandler(async (req, res, next) => {
+  const ownerId = req?.user?._id;
+  if (!isValidObjectId(ownerId))
+    return next(new CustomError(400, "Invalid User Id"));
+
+  const user = await Auth.findById(ownerId);
+  if (!user) return next(new CustomError(400, "User Not Found"));
+
+  const members = await Auth.find({ role: "member" }).lean();
+
+  return res.status(200).json({ success: true, data: members });
+});
+
+// Disable Member Access
+//----------------------
+const changeMemberAccess = asyncHandler(async (req, res, next) => {
+  const ownerId = req?.user?._id;
+  if (!isValidObjectId(ownerId))
+    return next(new CustomError(400, "Invalid User Id"));
+
+  console.log(ownerId);
+
+  const accessStatus = req?.query?.status;
+  if (!accessStatus)
+    return next(new CustomError(400, "Please Provide Access Status"));
+
+  console.log("accessStatus", accessStatus);
+
+  const user = await Auth.findById(ownerId);
+  if (!user) return next(new CustomError(400, "User Not Found"));
+
+  const memberId = req?.params?.id;
+  if (!isValidObjectId(memberId))
+    return next(new CustomError(400, "Invalid Member Id"));
+
+  const member = await Auth.findById(memberId);
+  if (!member) return next(new CustomError(400, "Member Not Found"));
+
+  const updatedMember = await Auth.findOneAndUpdate(
+    { _id: memberId },
+    { $set: { status: accessStatus } }
+  );
+
+  if (!updatedMember) return next(new CustomError(400, "Member Not Updated"));
+
+  return res.status(200).json({
+    success: true,
+    message: "Member Access Updated Successfully",
+  });
+});
+
 export {
   getClients,
   createInvoice,
@@ -679,4 +732,6 @@ export {
   getArchieveInvoices,
   removeArchiveInvoices,
   createArchiveInvoices,
+  getAllMembers,
+  changeMemberAccess,
 };

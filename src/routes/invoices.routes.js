@@ -14,6 +14,8 @@ import {
   getArchieveInvoices,
   removeArchiveInvoices,
   createArchiveInvoices,
+  getAllMembers,
+  changeMemberAccess,
 } from "../controllers/invoices.controller.js";
 
 app.post("/createInvoice", isAuthenticated, multipleUpload, createInvoice);
@@ -35,5 +37,9 @@ app.get("/getArchieveInvoices", isAuthenticated, getArchieveInvoices);
 app.post("/removeArchiveInvoices", isAuthenticated, removeArchiveInvoices);
 
 app.post("/createArchiveInvoices", isAuthenticated, createArchiveInvoices);
+
+app.get("/getAllMembers", isAuthenticated, getAllMembers);
+
+app.put("/changeMemberAccess/:id", isAuthenticated, changeMemberAccess);
 
 export default app;

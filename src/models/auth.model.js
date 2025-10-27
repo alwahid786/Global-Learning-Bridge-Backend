@@ -15,12 +15,10 @@ const authSchema = new mongoose.Schema(
     password: { type: String, required: true, minlength: 6, select: false },
     phone: {
       type: String,
-      required: true,
     },
     gender: {
       type: String,
       enum: ["male", "female", "other"],
-      required: true,
     },
     role: {
       type: String,
@@ -42,7 +40,6 @@ const authSchema = new mongoose.Schema(
     // Membership Fields
     //------------------
     isDonor: { type: Boolean, default: false },
-    subscriptionEnd: { type: Date },
   },
   { timestamps: true }
 );

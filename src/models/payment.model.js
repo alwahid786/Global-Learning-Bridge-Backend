@@ -2,13 +2,12 @@ import mongoose from "mongoose";
 
 const paymentSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+  name: { type: String, required: true },
   email: { type: String, required: true },
   amount: Number,
   currency: String,
   paymentType: {
     type: String,
-    enum: ["membership", "donation"],
-    default: "membership",
   },
   status: {
     type: String,

@@ -14,9 +14,9 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 //--------------
 
 const createPaymentIntent = asyncHandler(async (req, res, next) => {
-  const { amount, currency, paymentType, email } = req.body;
+  const { amount, currency, paymentType, email, name } = req.body;
 
-  if (!amount || !currency || !paymentType || !email)
+  if (!amount || !currency || !paymentType || !email || !name)
     return next(new CustomError(400, "Missing required payment fields."));
 
   let user = await Auth.findOne({ email });
@@ -24,10 +24,10 @@ const createPaymentIntent = asyncHandler(async (req, res, next) => {
   if (!user) {
     const autoPassword = crypto.randomBytes(8).toString("hex");
     user = await Auth.create({
-      name: "Anonymous",
+      name,
       email,
       password: autoPassword,
-      role: "admin",
+      role: "member",
     });
 
     const htmlTemplate = mailTemplateForNewUserCredentials({
@@ -41,25 +41,12 @@ const createPaymentIntent = asyncHandler(async (req, res, next) => {
     await sendMail(email, "Your Account Credentials", htmlTemplate, true);
   }
 
-  const now = new Date();
-
-  if (paymentType === "membership") {
-    if (user.isMember && user.subscriptionEnd > now) {
-      return next(
-        new CustomError(400, "You already have an active membership.")
-      );
-    }
-
-    if (user.isMember && user.subscriptionEnd <= now) {
-      console.log("Renewal detected for expired membership");
-    }
-  }
-
   const paymentIntent = await stripe.paymentIntents.create({
     amount,
     currency,
     automatic_payment_methods: { enabled: true },
     metadata: {
+      name,
       email,
       paymentType,
       userId: user._id.toString(),
@@ -68,6 +55,7 @@ const createPaymentIntent = asyncHandler(async (req, res, next) => {
 
   await Payment.create({
     userId: user._id,
+    name,
     email,
     amount,
     currency,
@@ -114,22 +102,9 @@ const stripeWebhook = asyncHandler(async (req, res) => {
       $or: [{ _id: userId }, { email }],
     });
 
-    if (user && (paymentType === "membership" || paymentType === "donation")) {
-      const now = new Date();
+    user.isDonor = true;
 
-      const baseDate =
-        user.subscriptionEnd && user.subscriptionEnd > now
-          ? user.subscriptionEnd
-          : now;
-
-      const newExpiry = new Date(baseDate);
-      newExpiry.setMonth(newExpiry.getMonth() + 1);
-
-      user.isMember = true;
-      user.subscriptionEnd = newExpiry;
-
-      await user.save();
-    }
+    await user.save();
   }
 
   res.status(200).json({ received: true });

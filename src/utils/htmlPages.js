@@ -286,8 +286,133 @@ const mailTemplateForNewUserCredentials = (data) => {
   `;
 };
 
+const receiptMailTemplate = (data) => {
+  const { name, email, amount, currency, status, transactionId, date } = data;
+
+  const formattedDate = new Date(date).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+
+  return `
+  <!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Donation Receipt - Global Learning Bridge</title>
+  </head>
+  <body
+    style="
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f7f8fa;
+      margin: 0;
+      padding: 0;
+    "
+  >
+    <table
+      width="100%"
+      cellpadding="0"
+      cellspacing="0"
+      style="max-width: 600px; margin: 40px auto; background: #ffffff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); overflow: hidden;"
+    >
+      <tr style="background-color: #004aad; color: #ffffff;">
+        <td style="text-align: center; padding: 25px;">
+          <img
+            src=${getEnv("LOGO_URL_WITH_BACKGROUND")}
+            alt="Global Learning Bridge Logo"
+            width="120"
+            style="margin-bottom: 10px;"
+          />
+          <h2 style="margin: 0; font-size: 22px;">Donation Receipt</h2>
+        </td>
+      </tr>
+
+      <tr>
+        <td style="padding: 30px;">
+          <p style="font-size: 16px; color: #333;">
+            Dear <strong>${name || "Recipient"}</strong>,
+          </p>
+          <p style="font-size: 15px; color: #555; line-height: 1.6;">
+            Thank you for your generous contribution to
+            <strong>Global Learning Bridge</strong>. Your support helps us
+            continue our mission to empower communities through education and
+            lifelong learning.
+          </p>
+
+          <table
+            width="100%"
+            cellpadding="8"
+            cellspacing="0"
+            style="border: 1px solid #e5e5e5; border-radius: 6px; margin: 20px 0;"
+          >
+            <tr style="background-color: #f9fafb;">
+              <td><strong>Donor Name:</strong></td>
+              <td>${name || "Recipient"}</td>
+            </tr>
+            <tr>
+              <td><strong>Email:</strong></td>
+              <td>${email}</td>
+            </tr>
+            <tr style="background-color: #f9fafb;">
+              <td><strong>Amount:</strong></td>
+              <td>${amount} ${currency}</td>
+            </tr>
+            <tr>
+              <td><strong>Status:</strong></td>
+              <td>${status}</td>
+            </tr>
+            <tr style="background-color: #f9fafb;">
+              <td><strong>Transaction ID:</strong></td>
+              <td>${transactionId}</td>
+            </tr>
+            <tr>
+              <td><strong>Date:</strong></td>
+              <td>${formattedDate}</td>
+            </tr>
+          </table>
+
+          <p style="font-size: 14px; color: #444; line-height: 1.6;">
+            <strong>Global Learning Bridge</strong> is a registered
+            <strong>501(c)(3) non-profit organization</strong>. Your
+            contribution is tax-deductible to the extent allowed by law. No
+            goods or services were provided in exchange for this donation.
+          </p>
+
+          <p style="font-size: 15px; color: #555; line-height: 1.6;">
+            Thank you once again for your kindness and commitment to our cause.
+          </p>
+
+          <p style="font-size: 15px; color: #333;">
+            Warm regards,<br />
+            <strong>Global Learning Bridge Team</strong><br />
+            <a
+              href="https://www.globallearningbridge.org"
+              style="color: #004aad; text-decoration: none;"
+              >www.globallearningbridge.org</a
+            >
+          </p>
+        </td>
+      </tr>
+
+      <tr>
+        <td
+          style="background-color: #f1f1f1; text-align: center; padding: 15px; font-size: 12px; color: #777;"
+        >
+          © {{year}} Global Learning Bridge. All rights reserved.<br />
+          EIN: 12-3456789
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>
+`;
+};
+
 export {
   mailTemplateForNotifications,
   returnMailPage,
   mailTemplateForNewUserCredentials,
+  receiptMailTemplate,
 };

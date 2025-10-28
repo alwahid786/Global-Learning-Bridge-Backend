@@ -16,6 +16,7 @@ import {
   deleteClaim,
   getAllDonations,
   downloadReceipt,
+  sendEmailReceipt,
 } from "../controllers/claims.controller.js";
 
 app.post(
@@ -53,5 +54,7 @@ app.get("/getInvoicesStats", isAuthenticated, getInvoicesStats);
 app.get("/getAllDonations", isAuthenticated, getAllDonations);
 
 app.get("/downloadReceipt/:receiptId", isAuthenticated, downloadReceipt);
+
+app.get("/sendEmailReceipt/:receiptId", isAuthenticated, sendEmailReceipt);
 
 export default app;

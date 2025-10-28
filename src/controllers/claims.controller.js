@@ -9,7 +9,10 @@ import { Chat } from "../models/chat.model.js";
 import { createNotification } from "../utils/createNotification.js";
 import { Parser } from "json2csv";
 import { sendMail } from "../utils/resendMail.js";
-import { mailTemplateForNotifications } from "../utils/htmlPages.js";
+import {
+  mailTemplateForNotifications,
+  receiptMailTemplate,
+} from "../utils/htmlPages.js";
 import Payment from "../models/payment.model.js";
 import { generateReceiptPDF } from "../utils/pdfGenerator.js";
 
@@ -798,6 +801,41 @@ const downloadReceipt = asyncHandler(async (req, res, next) => {
   return res.send(pdfBuffer);
 });
 
+// Send Email Receipt
+//------------------
+const sendEmailReceipt = asyncHandler(async (req, res, next) => {
+  const ownerId = req?.user?._id;
+  if (!isValidObjectId(ownerId))
+    return next(new CustomError(400, "Invalid User Id"));
+
+  const user = await Auth.findById(ownerId);
+  if (!user) return next(new CustomError(400, "User Not Found"));
+
+  const receiptId = req?.params?.receiptId;
+  if (!isValidObjectId(receiptId))
+    return next(new CustomError(400, "Invalid Receipt Id"));
+
+  const receipt = await Payment.findById(receiptId);
+  if (!receipt) return next(new CustomError(400, "Receipt Not Found"));
+
+  const emailTemplate = receiptMailTemplate(receipt);
+  const subject = "Donation Receipt - Global Learning Bridge";
+  const to = receipt?.email;
+  const text = "Donation Receipt - Global Learning Bridge";
+
+  await sendMail(to, subject, `${emailTemplate}`, true);
+
+  await Payment.findOneAndUpdate(
+    { _id: receiptId },
+    { $inc: { sendCount: 1 } }
+  );
+
+  res.status(200).json({
+    success: true,
+    message: "Receipt Sent Successfully",
+  });
+});
+
 export {
   createClaims,
   exportClaims,
@@ -812,4 +850,5 @@ export {
   deleteClaim,
   getAllDonations,
   downloadReceipt,
+  sendEmailReceipt,
 };

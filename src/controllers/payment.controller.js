@@ -6,7 +6,11 @@ import Payment from "../models/payment.model.js";
 import { sendMail } from "../utils/resendMail.js";
 import { getEnv } from "../configs/config.js";
 import crypto from "crypto";
-import { mailTemplateForNewUserCredentials } from "../utils/htmlPages.js";
+import {
+  mailTemplateForNewUserCredentials,
+  receiptMailTemplate,
+  failedPaymentTemplate,
+} from "../utils/htmlPages.js";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
@@ -88,23 +92,61 @@ const stripeWebhook = asyncHandler(async (req, res) => {
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
 
-  if (event.type === "payment_intent.succeeded") {
-    const paymentIntent = event.data.object;
-    const { email, paymentType, userId } = paymentIntent.metadata;
+  const data = event.data.object;
+  const eventType = event.type;
 
-    const payment = await Payment.findOne({ transactionId: paymentIntent.id });
-    if (payment) {
-      payment.status = "succeeded";
-      await payment.save();
+  const updatePayment = async (status, metadata) => {
+    const payment = await Payment.findOne({ transactionId: data.id });
+    if (!payment) return;
+    payment.status = status;
+    await payment.save();
+
+    if (status === "succeeded" && metadata?.userId) {
+      await Auth.findByIdAndUpdate(metadata.userId, { isDonor: true });
     }
 
-    const user = await Auth.findOne({
-      $or: [{ _id: userId }, { email }],
-    });
+    if (status === "succeeded" && metadata?.email) {
+      const receipt = await Payment.findOne({ transactionId: data.id });
+      const emailTemplate = receiptMailTemplate(receipt);
+      const subject = "Donation Receipt - Global Learning Bridge";
+      const to = receipt?.email;
 
-    user.isDonor = true;
+      await sendMail(to, subject, `${emailTemplate}`, true);
+    }
 
-    await user.save();
+    if (status === "failed") {
+      const receipt = await Payment.findOne({ transactionId: data.id });
+      const emailTemplate = failedPaymentTemplate(receipt);
+      const subject = "Donation Receipt - Global Learning Bridge";
+      const to = receipt?.email;
+
+      await sendMail(to, subject, `${emailTemplate}`, true);
+    }
+  };
+
+  switch (eventType) {
+    case "payment_intent.created":
+      console.log("notification for payment created");
+      break;
+
+    case "payment_intent.processing":
+      await updatePayment("processing", data.metadata);
+      break;
+
+    case "payment_intent.succeeded":
+      await updatePayment("succeeded", data.metadata);
+      break;
+
+    case "payment_intent.payment_failed":
+      await updatePayment("failed", data.metadata);
+      break;
+
+    case "payment_intent.canceled":
+      await updatePayment("canceled", data.metadata);
+      break;
+
+    default:
+      console.log(`Unhandled event type: ${eventType}`);
   }
 
   res.status(200).json({ received: true });

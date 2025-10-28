@@ -43,7 +43,7 @@ app.use(cookieParser());
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-app.use("/logos", express.static(path.join(__dirname, "public/Logos")));
+app.use("/logos", express.static(path.join(__dirname, "public/logos")));
 
 //Exclude Parse Webhook
 

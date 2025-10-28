@@ -478,7 +478,7 @@ export const generateReceiptPDF = (receiptData) => {
       const headerFillColor = "#08506E";
 
       let companyLogoBase64 = null;
-      let companyLogo = getEnv("LOGO_URL_WITH_BACKGROUND");
+      let companyLogo = getEnv("CHARITY_LOGO");
       if (companyLogo) {
         const response = await axios.get(companyLogo, {
           responseType: "arraybuffer",

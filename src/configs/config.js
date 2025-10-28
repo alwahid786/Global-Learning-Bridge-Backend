@@ -52,6 +52,7 @@ const config = Object.freeze({
   // ------------
   LOGO_URL_WITH_BACKGROUND: process.env.LOGO_URL_WITH_BACKGROUND,
   LOGO_URL_WITHOUT_BACKGROUND: process.env.LOGO_URL_WITHOUT_BACKGROUND,
+  CHARITY_LOGO: process.env.CHARITY_LOGO,
 
   // stripe configs
   // --------------

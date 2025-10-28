@@ -287,9 +287,10 @@ const mailTemplateForNewUserCredentials = (data) => {
 };
 
 const receiptMailTemplate = (data) => {
-  const { name, email, amount, currency, status, transactionId, date } = data;
+  const { name, email, amount, currency, status, transactionId, createdAt } =
+    data;
 
-  const formattedDate = new Date(date).toLocaleString("en-GB", {
+  const formattedDate = new Date(createdAt).toLocaleString("en-GB", {
     day: "2-digit",
     month: "short",
     year: "numeric",
@@ -325,7 +326,7 @@ const receiptMailTemplate = (data) => {
           <img
             src=${getEnv("CHARITY_LOGO")}
             alt="Global Learning Bridge Logo"
-            width="120"
+            width="220"
             style="margin-bottom: 10px;"
           />
           <h2 style="margin: 0; font-size: 22px; color: #28a745;">
@@ -403,7 +404,7 @@ const receiptMailTemplate = (data) => {
         <td
           style="background-color: #f1f1f1; text-align: center; padding: 15px; font-size: 12px; color: #777;"
         >
-          © {{year}} Global Learning Bridge. All rights reserved.<br />
+          © 2025 Global Learning Bridge. All rights reserved.<br />
           EIN: 12-3456789
         </td>
       </tr>
@@ -414,9 +415,10 @@ const receiptMailTemplate = (data) => {
 };
 
 const failedPaymentTemplate = (data) => {
-  const { name, email, amount, currency, status, transactionId, date } = data;
+  const { name, email, amount, currency, status, transactionId, createdAt } =
+    data;
 
-  const formattedDate = new Date(date).toLocaleString("en-GB", {
+  const formattedDate = new Date(createdAt).toLocaleString("en-GB", {
     day: "2-digit",
     month: "short",
     year: "numeric",
@@ -452,7 +454,7 @@ const failedPaymentTemplate = (data) => {
           <img
             src=${getEnv("CHARITY_LOGO")}
             alt="Global Learning Bridge Logo"
-            width="120"
+            width="220"
             style="margin-bottom: 10px;"
           />
           <h2 style="margin: 0; font-size: 22px; color: #d93025;">
@@ -533,7 +535,7 @@ const failedPaymentTemplate = (data) => {
         <td
           style="background-color: #f1f1f1; text-align: center; padding: 15px; font-size: 12px; color: #777;"
         >
-          © {{year}} Global Learning Bridge. All rights reserved.<br />
+          © 2025 Global Learning Bridge. All rights reserved.<br />
           EIN: 12-3456789
         </td>
       </tr>

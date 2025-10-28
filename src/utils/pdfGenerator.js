@@ -509,7 +509,7 @@ export const generateReceiptPDF = (receiptData) => {
               companyLogoBase64
                 ? {
                     image: companyLogoBase64,
-                    width: 120,
+                    width: 220,
                     alignment: "center",
                     margin: [0, 0, 0, 15],
                   }

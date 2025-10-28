@@ -290,9 +290,9 @@ const receiptMailTemplate = (data) => {
   const { name, email, amount, currency, status, transactionId, date } = data;
 
   const formattedDate = new Date(date).toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "long",
     day: "numeric",
+    month: "long",
+    year: "numeric",
   });
 
   return `
@@ -321,7 +321,7 @@ const receiptMailTemplate = (data) => {
       <tr style="background-color: #ffffff; color: #000;">
         <td style="text-align: center; padding: 25px;">
           <img
-            src=${getEnv("LOGO_URL_WITH_BACKGROUND")}
+            src=${getEnv("CHARITY_LOGO")}
             alt="Global Learning Bridge Logo"
             width="120"
             style="margin-bottom: 10px;"
@@ -378,9 +378,10 @@ const receiptMailTemplate = (data) => {
           </table>
 
           <p style="font-size: 14px; color: #444; line-height: 1.6;">
-            Your payment confirmation has been recorded successfully. A copy of
-            this receipt is attached for your records. If you have any
-            questions, please reach out to our support team.
+            <strong>Global Learning Bridge</strong> is a registered
+            <strong>501(c)(3) non-profit organization</strong>. Your
+            contribution is tax-deductible to the extent allowed by law. No
+            goods or services were provided in exchange for this donation.
           </p>
 
           <p style="font-size: 15px; color: #555; line-height: 1.6;">
@@ -391,11 +392,6 @@ const receiptMailTemplate = (data) => {
           <p style="font-size: 15px; color: #333;">
             Warm regards,<br />
             <strong>Global Learning Bridge Team</strong><br />
-            <a
-              href="https://www.globallearningbridge.org"
-              style="color: #004aad; text-decoration: none;"
-              >www.globallearningbridge.org</a
-            >
           </p>
         </td>
       </tr>
@@ -450,7 +446,7 @@ const failedPaymentTemplate = (data) => {
       <tr style="background-color: #ffffff; color: #000;">
         <td style="text-align: center; padding: 25px;">
           <img
-            src=${getEnv("LOGO_URL_WITH_BACKGROUND")}
+            src=${getEnv("CHARITY_LOGO")}
             alt="Global Learning Bridge Logo"
             width="120"
             style="margin-bottom: 10px;"
@@ -509,6 +505,10 @@ const failedPaymentTemplate = (data) => {
           <p style="font-size: 14px; color: #444; line-height: 1.6;">
             Please ensure your payment details are correct and that your account
             has sufficient funds. You may also try using a different payment method.
+            <strong>Global Learning Bridge</strong> is a registered
+            <strong>501(c)(3) non-profit organization</strong>. Your
+            contribution is tax-deductible to the extent allowed by law. No
+            goods or services were provided in exchange for this donation.
           </p>
 
           <p style="font-size: 15px; color: #555; line-height: 1.6;">
@@ -519,11 +519,7 @@ const failedPaymentTemplate = (data) => {
           <p style="font-size: 15px; color: #333;">
             Warm regards,<br />
             <strong>Global Learning Bridge Team</strong><br />
-            <a
-              href="https://www.globallearningbridge.org"
-              style="color: #004aad; text-decoration: none;"
-              >www.globallearningbridge.org</a
-            >
+            <a href="https://globallearningbridge.org" style="color: #004aad;">https://globallearningbridge.org</a>
           </p>
         </td>
       </tr>

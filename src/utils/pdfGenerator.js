@@ -509,10 +509,9 @@ export const generateReceiptPDF = (receiptData) => {
               companyLogoBase64
                 ? {
                     image: companyLogoBase64,
-                    width: 80,
-                    height: 80,
+                    width: 120,
                     alignment: "center",
-                    margin: [0, 0, 0, 8],
+                    margin: [0, 0, 0, 15],
                   }
                 : {
                     text: "GLOBAL LEARNING BRIDGE",

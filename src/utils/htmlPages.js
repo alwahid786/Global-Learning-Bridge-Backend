@@ -289,10 +289,12 @@ const mailTemplateForNewUserCredentials = (data) => {
 const receiptMailTemplate = (data) => {
   const { name, email, amount, currency, status, transactionId, date } = data;
 
-  const formattedDate = new Date(date).toLocaleDateString("en-US", {
-    day: "numeric",
-    month: "long",
+  const formattedDate = new Date(date).toLocaleString("en-GB", {
+    day: "2-digit",
+    month: "short",
     year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
   });
 
   return `
@@ -414,10 +416,12 @@ const receiptMailTemplate = (data) => {
 const failedPaymentTemplate = (data) => {
   const { name, email, amount, currency, status, transactionId, date } = data;
 
-  const formattedDate = new Date(date).toLocaleDateString("en-US", {
+  const formattedDate = new Date(date).toLocaleString("en-GB", {
+    day: "2-digit",
+    month: "short",
     year: "numeric",
-    month: "long",
-    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
   });
 
   return `
